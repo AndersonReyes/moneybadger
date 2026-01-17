@@ -9,18 +9,17 @@ import (
 type AccountType = string
 
 const (
-	AccountTypeDefault    = " default"
+	AccountTypeDefault    = "default"
 	AccountTypeCreditCard = "creditcard"
 )
 
 type Account struct {
 	gorm.Model
-	ID             uint            `gorm:"primaryKey;autoIncrement:true"`
-	Type           AccountType     `gorm:"size:128"`
-	AccountNumber  string          `gorm:"size:32;index;unique"`
-	Name           string          `gorm:"index"`
-	InitialBalance decimal.Decimal `gorm:"size:64"`
-	Amount         decimal.Decimal `gorm:"size:64"`
+	AccountNumber  string          `gorm:"primaryKey;unique"`
+	Type           AccountType     `gorm:"size:128;notnull"`
+	Name           string          `gorm:"index;notnull"`
+	InitialBalance decimal.Decimal `gorm:"size:64;notnull"`
+	Balance        decimal.Decimal `gorm:"size:64;notnull"`
 }
 
 type ApiRoute interface {

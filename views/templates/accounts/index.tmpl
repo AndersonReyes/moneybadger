@@ -1,0 +1,74 @@
+{{ define "accounts/index.tmpl" }}
+<html lang="en">
+  <head>
+    <title>Accounts</title>
+    <!--<link rel="stylesheet" href="/assets/style.css" />-->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <h3>Accounts</h3>
+      <table class="striped">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Type</th>
+            <th scope="col">Account Number</th>
+            <th scope="col">Account Name</th>
+            <th scope="col">Initial Balance</th>
+            <th scope="col">Balance</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range .accounts }}
+          <tr>
+            <th scope="row">{{ .ID }}</th>
+            <td>{{.Type}}</td>
+            <td>{{.AccountNumber}}</td>
+            <td>{{.Name}}</td>
+            <td>{{.InitialBalance}}</td>
+            <td>{{.Balance}}</td>
+            <td>
+              <details class="dropdown text-center">
+                <summary class="text-center">Actions</summary>
+                <ul>
+                  <li>
+                    <a href="/accounts/edit/{{ .AccountNumber }}">Edit</a>
+                  </li>
+                  <li>
+                    <a
+                      hx-delete="/api/accounts/{{ .AccountNumber }}"
+                      hx-trigger="click"
+                      hx-target="closest tr"
+                      hx-swap="delete"
+                      hx-confirm="Are you sure you want to delete?"
+                      >Delete</a
+                    >
+                  </li>
+                </ul>
+              </details>
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"
+      integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
+{{ end }}

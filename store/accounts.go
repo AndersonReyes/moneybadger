@@ -45,3 +45,14 @@ func (c AccountStore) GetAccount(accountNumber string) (models.Account, error) {
 	}
 	return acc, nil
 }
+
+func (c AccountStore) DeleteAccount(accountNumber string) error {
+	n, err := gorm.G[models.Account](c.db).Where("account_number = ?", accountNumber).Delete(*c.ctx)
+
+	if n != 1 || err != nil {
+		log.Printf("failed to delete account[%s]: %s\n", accountNumber, err)
+		return err
+	}
+
+	return nil
+}

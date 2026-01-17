@@ -22,7 +22,7 @@ func AccountsInit(ctx *context.Context, db *gorm.DB) accountsApi {
 	}
 }
 
-type accountsGetRequest struct {
+type accountsRequestParams struct {
 	AccountNumber string `uri:"accountNumber"`
 }
 
@@ -44,8 +44,38 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 		})
 	})
 
+	router.PUT("/accounts/:accountNumber", func(ctx *gin.Context) {
+
+		var req accountsRequestParams
+
+		if err := ctx.ShouldBindUri(&req); err != nil {
+			log.Printf("invalid account number: %s\n", err)
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
+		acc, err := c.db.GetAccount(req.AccountNumber)
+
+		if err != nil {
+			log.Printf("error getting account %+v:\n%s\n", req, err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "",
+			"data":    []models.Account{acc},
+		})
+	})
+
 	router.GET("/accounts/:accountNumber", func(ctx *gin.Context) {
-		var req accountsGetRequest
+		var req accountsRequestParams
 
 		if err := ctx.ShouldBindUri(&req); err != nil {
 			log.Printf("invalid account number: %s\n", err)
@@ -75,6 +105,10 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 
 	router.POST("/accounts", func(ctx *gin.Context) {
 		var accToCreate models.Account
+		if accToCreate.Type == "" {
+			accToCreate.Type = models.AccountTypeDefault
+		}
+
 		if err := ctx.ShouldBindJSON(&accToCreate); err != nil {
 			log.Printf("Post:/accounts error: %s", err)
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": true, "message": err.Error()})
@@ -87,11 +121,41 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 				"error":   true,
 				"message": err.Error(),
 			})
+			return
 		}
 
 		ctx.JSON(http.StatusOK, gin.H{
 			"error":   false,
 			"message": "account created",
+		})
+	})
+
+	router.DELETE("/accounts/:accountNumber", func(ctx *gin.Context) {
+
+		var req accountsRequestParams
+
+		if err := ctx.ShouldBindUri(&req); err != nil {
+			log.Printf("invalid account number: %s\n", err)
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
+		err := c.db.DeleteAccount(req.AccountNumber)
+
+		if err != nil {
+			log.Printf("error deleting account %s:\n%s\n", req.AccountNumber, err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "account deleted",
 		})
 	})
 
