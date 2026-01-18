@@ -24,6 +24,7 @@ func AccountsInit(ctx *context.Context, db *gorm.DB) accountsApi {
 
 type accountsRequestParams struct {
 	AccountNumber string `uri:"accountNumber"`
+	TemplateName  string `uri:"templateName"`
 }
 
 func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
@@ -48,7 +49,7 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 
 		var overWrites models.Account
 
-		if err := ctx.ShouldBindJSON(&overWrites); err != nil {
+		if err := ctx.ShouldBind(&overWrites); err != nil {
 			log.Printf("Put:/accounts error: %s", err)
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": true, "message": err.Error()})
 			return
@@ -109,7 +110,7 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 			accToCreate.Type = models.AccountTypeDefault
 		}
 
-		if err := ctx.ShouldBindJSON(&accToCreate); err != nil {
+		if err := ctx.ShouldBind(&accToCreate); err != nil {
 			log.Printf("Post:/accounts error: %s", err)
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": true, "message": err.Error()})
 			return
@@ -157,6 +158,32 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 			"error":   false,
 			"message": "account deleted",
 		})
+	})
+
+	// templates
+
+	router.GET("/template/accounts/:templateName/:accountNumber", func(ctx *gin.Context) {
+		var req accountsRequestParams
+
+		if err := ctx.ShouldBindUri(&req); err != nil {
+			log.Printf("invalid template name: %s\n", err)
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		a, err := c.db.GetAccount(req.AccountNumber)
+
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"error":   true,
+				"message": "invalid account number",
+			})
+		}
+
+		ctx.HTML(http.StatusOK, req.TemplateName, a)
 	})
 
 	return nil

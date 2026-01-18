@@ -29,37 +29,8 @@
             <th scope="col"></th>
           </tr>
         </thead>
-        <tbody>
-          {{ range .accounts }}
-          <tr>
-            <th scope="row">{{ .ID }}</th>
-            <td>{{.Type}}</td>
-            <td>{{.AccountNumber}}</td>
-            <td>{{.Name}}</td>
-            <td>{{.InitialBalance}}</td>
-            <td>{{.Balance}}</td>
-            <td>
-              <details class="dropdown text-center">
-                <summary class="text-center">Actions</summary>
-                <ul>
-                  <li>
-                    <a href="/accounts/edit/{{ .AccountNumber }}">Edit</a>
-                  </li>
-                  <li>
-                    <a
-                      hx-delete="/api/accounts/{{ .AccountNumber }}"
-                      hx-trigger="click"
-                      hx-target="closest tr"
-                      hx-swap="delete"
-                      hx-confirm="Are you sure you want to delete?"
-                      >Delete</a
-                    >
-                  </li>
-                </ul>
-              </details>
-            </td>
-          </tr>
-          {{end}}
+        <tbody hx-target="closest tr" hx-swap="outerHTML">
+          {{ range .accounts }} {{ template "accounts_table_row" . }} {{end}}
         </tbody>
       </table>
     </div>

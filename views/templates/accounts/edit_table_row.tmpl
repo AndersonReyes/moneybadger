@@ -1,45 +1,33 @@
-{{ define "accounts/edit_table_row.tmpl" }}
-<form>
-  <fieldset>
-    <!--<label>
-            ID
-            <input name="ID" readonly value="{{ .ID }}" type="number" />
-          </label>-->
-    <label>
-      Account Number
-      <input name="AccountNumber" readonly value="{{ .AccountNumber }}" />
-    </label>
-    <label>
-      Type
-      <input name="Type" readonly value="{{ .Type }}" />
-    </label>
-    <label>
-      Account Name
-      <input name="Name" value="{{ .Name }}" />
-    </label>
-    <label>
-      Initial Balance
-      <input
-        name="InitialBalance"
-        value="{{ .InitialBalance }}"
-        type="number"
-      />
-    </label>
-    <label>
-      Balance
-      <input name="Balance" value="{{ .Balance }}" type="number" />
-    </label>
-
-    <div class="flex justify-center gap-4">
-      <a
-        href="/accounts"
-        hx-put="/api/accounts/"
-        hx-swap="none"
-        hx-include="closest input"
-        >Save</a
-      >
-      <a href="/accounts">Close</a>
-    </div>
-  </fieldset>
-</form>
+{{ define "accounts_edit_table_row" }}
+<tr
+  hx-trigger="cancel"
+  class="editing"
+  hx-get="/api/template/accounts/accounts_table_row/{{ .AccountNumber }}"
+>
+  <th scope="row"><input name="ID" readonly value="{{ .ID }}" /></th>
+  <td><input name="Type" readonly value="{{.Type}}" /></td>
+  <td><input name="AccountNumber" readonly value="{{.AccountNumber}}" /></td>
+  <td><input autofocus name="Name" value="{{.Name }}" /></td>
+  <td><input name="InitialBalance" value="{{.InitialBalance }}" /></td>
+  <td><input name="Balance" value="{{.Balance }}" /></td>
+  <td>
+    <details class="dropdown text-center">
+      <summary class="text-center">Actions</summary>
+      <ul>
+        <li>
+          <a hx-put="/api/accounts" hx-include="closest tr" hx-swap="none"
+            >Save</a
+          >
+        </li>
+        <li>
+          <a
+            hx-get="/api/template/accounts/accounts_table_row/{{ .AccountNumber }}"
+          >
+            Cancel
+          </a>
+        </li>
+      </ul>
+    </details>
+  </td>
+</tr>
 {{ end }}
