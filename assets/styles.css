@@ -1,0 +1,73 @@
+a {
+  /*color: white;
+  background-color: blue;
+  border-radius: 0.5rem;*/
+  text-decoration: none;
+}
+
+/** Table styles
+
+
+*/
+
+table {
+  border-collapse: collapse;
+  width: 80%;
+}
+
+table,
+th,
+td {
+  /*border: 1px solid;*/
+  padding: 1rem;
+}
+
+tr {
+  border-bottom: 0.1rem solid #f2f2f2;
+}
+
+tr:hover {
+  background-color: #d9d9d9;
+}
+
+thead {
+  border-bottom: 0.5rem solid #f2f2f2;
+  text-align: left;
+}
+
+tfoot {
+  border-top: 0.5rem solid #f2f2f2;
+  border-bottom: 0;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/** app */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.details summary {
+  text-align: center;
+  color: white;
+  background-color: #4caf50;
+  border-radius: 10px;
+  border-color: white;
+  padding: 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.dropdown-btn:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown-content {
+  display: none;
+}

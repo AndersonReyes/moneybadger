@@ -1,7 +1,7 @@
-{{ define "accounts/index.tmpl" }}
+{{ define "transactions/index.tmpl" }}
 <html lang="en">
   <head>
-    <title>Accounts</title>
+    <title>Transactions</title>
     <!--<link rel="stylesheet" href="/assets/style.css" />-->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -22,24 +22,20 @@
         <thead>
           <tr>
             <th scope="col">ID</th>
-            <th scope="col">Type</th>
-            <th scope="col">Account Number</th>
-            <th scope="col">Account Name</th>
-            <th scope="col">Initial Balance</th>
-            <th scope="col">Balance</th>
-            <th scope="col"></th>
+            <th scope="col">Description</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Category</th>
+            <th scope="col">Date</th>
+            <th scope="col">SourceAccountId</th>
+            <th scope="col">SourceAccount</th>
+            <th scope="col">DestinationAccountId</th>
+            <th scope="col">DestinationAccount</th>
+            <th scope="col">Tags</th>
           </tr>
         </thead>
         <tbody hx-target="closest tr" hx-swap="outerHTML">
-          {{ range .accounts }} {{ template "accounts_table_row" . }} {{end}}
+          <!--{{ range .accounts }} {{ template "accounts_table_row" . }} {{end}}-->
         </tbody>
-        <tfoot>
-          <tr>
-            <td>
-              <a>New Account</a>
-            </td>
-          </tr>
-        </tfoot>
       </table>
     </div>
 

@@ -1,0 +1,29 @@
+{{ define "accounts_edit_table_row" }}
+<tr hx-trigger="cancel" class="editing" hx-swap="delete">
+  <td><input name="ID" readonly value="{{ .ID }}" /></td>
+  <td><input name="Type" value="{{.Type}}" /></td>
+  <td><input name="AccountNumber" value="{{.AccountNumber}}" /></td>
+  <td><input autofocus name="Name" value="{{.Name }}" /></td>
+  <td><input name="InitialBalance" value="{{.InitialBalance }}" /></td>
+  <td><input name="Balance" value="{{.Balance }}" /></td>
+  <td>
+    <details class="dropdown text-center">
+      <summary class="text-center">Actions</summary>
+      <ul>
+        <li>
+          <a hx-put="/api/accounts" hx-include="closest tr" hx-swap="none"
+            >Save</a
+          >
+        </li>
+        <li>
+          <a
+            hx-get="/api/template/accounts/accounts_table_row/{{ .AccountNumber }}"
+          >
+            Cancel
+          </a>
+        </li>
+      </ul>
+    </details>
+  </td>
+</tr>
+{{ end }}
