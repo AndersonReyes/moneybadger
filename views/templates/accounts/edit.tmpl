@@ -9,36 +9,57 @@
 
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.purple.min.css"
     />
+
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   </head>
 
   <body>
-    <div class="container">
+    <div class="container flex flex-col">
       <h3>Edit Accounts</h3>
-      <form>
+      <form hx-ext="json-enc" data-json-parse-data>
         <fieldset>
+          <!--<label>
+            ID
+            <input name="ID" readonly value="{{ .ID }}" type="number" />
+          </label>-->
           <label>
-            First name
+            Account Number
+            <input name="AccountNumber" readonly value="{{ .AccountNumber }}" />
+          </label>
+          <label>
+            Type
+            <input name="Type" readonly value="{{ .Type }}" />
+          </label>
+          <label>
+            Account Name
+            <input name="Name" value="{{ .Name }}" />
+          </label>
+          <label>
+            Initial Balance
             <input
-              name="first_name"
-              placeholder="First name"
-              autocomplete="given-name"
+              name="InitialBalance"
+              value="{{ .InitialBalance }}"
+              type="number"
             />
           </label>
           <label>
-            Email
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              autocomplete="email"
-            />
+            Balance
+            <input name="Balance" value="{{ .Balance }}" type="number" />
           </label>
-        </fieldset>
 
-        <input type="submit" value="Subscribe" />
+          <div class="flex justify-center gap-4">
+            <a
+              href="/accounts"
+              hx-put="/api/accounts/"
+              hx-swap="none"
+              hx-include="closest input"
+              >Save</a
+            >
+            <a href="/accounts">Close</a>
+          </div>
+        </fieldset>
       </form>
     </div>
 
@@ -47,6 +68,7 @@
       integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz"
       crossorigin="anonymous"
     ></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
   </body>
 </html>
 {{ end }}

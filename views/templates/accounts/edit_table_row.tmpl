@@ -1,0 +1,45 @@
+{{ define "accounts/edit_table_row.tmpl" }}
+<form>
+  <fieldset>
+    <!--<label>
+            ID
+            <input name="ID" readonly value="{{ .ID }}" type="number" />
+          </label>-->
+    <label>
+      Account Number
+      <input name="AccountNumber" readonly value="{{ .AccountNumber }}" />
+    </label>
+    <label>
+      Type
+      <input name="Type" readonly value="{{ .Type }}" />
+    </label>
+    <label>
+      Account Name
+      <input name="Name" value="{{ .Name }}" />
+    </label>
+    <label>
+      Initial Balance
+      <input
+        name="InitialBalance"
+        value="{{ .InitialBalance }}"
+        type="number"
+      />
+    </label>
+    <label>
+      Balance
+      <input name="Balance" value="{{ .Balance }}" type="number" />
+    </label>
+
+    <div class="flex justify-center gap-4">
+      <a
+        href="/accounts"
+        hx-put="/api/accounts/"
+        hx-swap="none"
+        hx-include="closest input"
+        >Save</a
+      >
+      <a href="/accounts">Close</a>
+    </div>
+  </fieldset>
+</form>
+{{ end }}

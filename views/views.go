@@ -13,8 +13,6 @@ type accountViewRequestParams struct {
 }
 
 func SetUpViews(router *gin.Engine, accountsStore store.AccountStore) error {
-	router.Static("/assets", "./assets")
-	router.LoadHTMLGlob("views/templates/**/*")
 	router.GET("/accounts", func(ctx *gin.Context) {
 		accs, err := accountsStore.ListAccounts()
 

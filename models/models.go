@@ -15,7 +15,7 @@ const (
 
 type Account struct {
 	gorm.Model
-	AccountNumber  string          `gorm:"primaryKey;unique"`
+	AccountNumber  string          `gorm:"primaryKey;unique" binding:"required"`
 	Type           AccountType     `gorm:"size:128;notnull"`
 	Name           string          `gorm:"index;notnull"`
 	InitialBalance decimal.Decimal `gorm:"size:64;notnull"`

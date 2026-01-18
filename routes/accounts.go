@@ -44,22 +44,23 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 		})
 	})
 
-	router.PUT("/accounts/:accountNumber", func(ctx *gin.Context) {
+	router.PUT("/accounts", func(ctx *gin.Context) {
 
-		var req accountsRequestParams
+		var overWrites models.Account
 
-		if err := ctx.ShouldBindUri(&req); err != nil {
-			log.Printf("invalid account number: %s\n", err)
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error":   true,
-				"message": err.Error(),
-			})
+		if err := ctx.ShouldBindJSON(&overWrites); err != nil {
+			log.Printf("Put:/accounts error: %s", err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": true, "message": err.Error()})
 			return
 		}
-		acc, err := c.db.GetAccount(req.AccountNumber)
 
-		if err != nil {
-			log.Printf("error getting account %+v:\n%s\n", req, err)
+		if overWrites.Type == "" {
+			overWrites.Type = models.AccountTypeDefault
+		}
+
+		log.Printf("updating %+v\n", overWrites)
+		if err := c.db.UpdateAccount(overWrites); err != nil {
+			log.Printf("error updating account %+v:\n%s\n", overWrites, err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error":   true,
 				"message": err.Error(),
@@ -70,7 +71,6 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 		ctx.JSON(http.StatusOK, gin.H{
 			"error":   false,
 			"message": "",
-			"data":    []models.Account{acc},
 		})
 	})
 

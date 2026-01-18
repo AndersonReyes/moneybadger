@@ -46,6 +46,16 @@ func (c AccountStore) GetAccount(accountNumber string) (models.Account, error) {
 	return acc, nil
 }
 
+func (c AccountStore) UpdateAccount(m models.Account) error {
+	_, err := gorm.G[models.Account](c.db).Where("account_number = ?", m.AccountNumber).Updates(*c.ctx, m)
+
+	if err != nil {
+		log.Println("UpdateAccount failed: " + err.Error())
+		return err
+	}
+	return nil
+}
+
 func (c AccountStore) DeleteAccount(accountNumber string) error {
 	n, err := gorm.G[models.Account](c.db).Where("account_number = ?", accountNumber).Delete(*c.ctx)
 
