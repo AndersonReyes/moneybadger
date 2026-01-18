@@ -11,7 +11,7 @@ import (
 
 func SetupRoutes(g *gin.RouterGroup, ctx *context.Context, db *gorm.DB) error {
 
-	apis := []models.ApiRoute{AccountsInit(ctx, db)}
+	apis := []models.ApiRoute{AccountsInit(ctx, db), TransactionsInit(ctx, db)}
 
 	for _, api := range apis {
 		if err := api.SetupRouter(g); err != nil {

@@ -1,0 +1,15 @@
+{{ define "transactions_table_row" }}
+<tr>
+  <th scope="row">{{ .ID }}</th>
+  <td>{{.Description}}</td>
+  <td>{{.Amount}}</td>
+  <td>{{.Category}}</td>
+  <td>{{.Date}}</td>
+  <td>{{.SourceAccountID}}</td>
+  <td>{{.SourceAccount.Name}}</td>
+  <td>{{.DestinationAccountID}}</td>
+  <td>{{.DestinationAccount.Name}}</td>
+  <td>{{.Tags}}</td>
+  <td></td>
+</tr>
+{{ end }}

@@ -1,4 +1,4 @@
-{{ define "transactions/index.tmpl" }}
+{{ define "transactions_index" }}
 <html lang="en">
   <head>
     <title>Transactions</title>
@@ -27,14 +27,15 @@
             <th scope="col">Category</th>
             <th scope="col">Date</th>
             <th scope="col">SourceAccountId</th>
-            <th scope="col">SourceAccount</th>
+            <th scope="col">SourceAccountName</th>
             <th scope="col">DestinationAccountId</th>
-            <th scope="col">DestinationAccount</th>
+            <th scope="col">DestinationAccountName</th>
             <th scope="col">Tags</th>
           </tr>
         </thead>
         <tbody hx-target="closest tr" hx-swap="outerHTML">
-          <!--{{ range .accounts }} {{ template "accounts_table_row" . }} {{end}}-->
+          {{ range .transactions }} {{ template "transactions_table_row" . }}
+          {{end}}
         </tbody>
       </table>
     </div>

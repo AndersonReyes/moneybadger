@@ -15,16 +15,6 @@ const (
 	AccountTypeCreditCard = "creditcard"
 )
 
-type Category struct {
-	Name               string `gorm:"notnull"`
-	TransactionMatcher string
-}
-
-type Group struct {
-	Name       string
-	Categories []Category
-}
-
 type Account struct {
 	gorm.Model
 	AccountNumber  string          `gorm:"primaryKey;unique" binding:"required"`
@@ -38,13 +28,13 @@ type Transaction struct {
 	gorm.Model
 	Description          string          `gorm:"notnull;class:FULLTEXT"`
 	Amount               decimal.Decimal `gorm:"notnull"`
-	Category             Category        `gorm:"notnull"`
+	Category             string          `gorm:"index;notnull"`
 	Date                 time.Time       `gorm:"index,notnull"`
 	SourceAccount        Account
 	SourceAccountID      string
 	DestinationAccount   Account
 	DestinationAccountID string
-	Tags                 []string
+	Tags                 string
 }
 
 type ApiRoute interface {

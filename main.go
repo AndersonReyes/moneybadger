@@ -23,7 +23,7 @@ func main() {
 	ctx := context.Background()
 
 	// // Migrate the schema
-	db.AutoMigrate(&models.Account{})
+	db.AutoMigrate(&models.Account{}, &models.Transaction{})
 
 	router := gin.Default()
 	apiRouter := router.Group("/api")
@@ -35,7 +35,7 @@ func main() {
 		log.Panicf("failed to setup routes: %s\n", err)
 	}
 
-	if err := views.SetUpViews(router, store.AccountStoreInit(&ctx, db)); err != nil {
+	if err := views.SetUpViews(router, store.AccountStoreInit(&ctx, db), store.TransactionStoreInit(&ctx, db)); err != nil {
 		log.Panicf("failed to setup views: %s\n", err)
 	}
 

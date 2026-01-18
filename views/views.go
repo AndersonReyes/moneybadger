@@ -41,7 +41,7 @@ func SetUpViews(router *gin.Engine, accountsStore store.AccountStore,
 			})
 		}
 
-		ctx.HTML(http.StatusOK, "transactions/index.tmpl", gin.H{
+		ctx.HTML(http.StatusOK, "transactions_index", gin.H{
 			"transactions": ts,
 		})
 	})
