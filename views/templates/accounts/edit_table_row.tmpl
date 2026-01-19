@@ -4,7 +4,6 @@
   class="editing"
   hx-get="/api/template/accounts/accounts_table_row/{{ .AccountNumber }}"
 >
-  <th scope="row"><input name="ID" readonly value="{{ .ID }}" /></th>
   <td><input name="Type" readonly value="{{.Type}}" /></td>
   <td><input name="AccountNumber" readonly value="{{.AccountNumber}}" /></td>
   <td><input autofocus name="Name" value="{{.Name }}" /></td>

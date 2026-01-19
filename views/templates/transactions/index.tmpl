@@ -16,19 +16,49 @@
   </head>
 
   <body>
-    <div class="container">
+    <div class="container flex flex-col gap-10">
       {{ template "core_nav" . }}
-      <table>
+
+      <div class="flex flex-row justify-end">
+        <button
+          hx-delete="/api/transactions/all"
+          class="bg-red-400"
+          hx-swap="none"
+          hx-confirm="Are you sure you want to delete all transactions?"
+        >
+          Clear Transactions
+        </button>
+      </div>
+
+      <article>
+        <h2>Import from File</h2>
+        <form
+          hx-encoding="multipart/form-data"
+          hx-swap="none"
+          hx-post="/api/transactions/upload"
+          _="on htmx:xhr:progress(loaded, total) set #progress.value to (loaded/total)*100"
+        >
+          <input type="file" id="importFile" name="transactions" />
+          <button>Submit</button>
+          <progress id="progress" value="0" max="100"></progress>
+        </form>
+      </article>
+
+      <input
+        type="text"
+        id="transactionsListFilter"
+        onkeyup="filterTable('transactionsListFilter', 'transactionsList')"
+        placeholder="filter transactions...."
+      />
+
+      <table id="transactionsList" class="h-24 striped">
         <thead>
           <tr>
-            <th scope="col">ID</th>
             <th scope="col">Description</th>
             <th scope="col">Amount</th>
             <th scope="col">Category</th>
             <th scope="col">Date</th>
-            <th scope="col">SourceAccountId</th>
             <th scope="col">SourceAccountName</th>
-            <th scope="col">DestinationAccountId</th>
             <th scope="col">DestinationAccountName</th>
             <th scope="col">Tags</th>
           </tr>
@@ -45,6 +75,7 @@
       integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz"
       crossorigin="anonymous"
     ></script>
+    <script src="/assets/index.js"></script>
   </body>
 </html>
 {{ end }}

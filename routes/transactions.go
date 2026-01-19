@@ -2,20 +2,28 @@
 package routes
 
 import (
-	"context"
+	"encoding/csv"
+	"errors"
+	"fmt"
+	"io"
+	"log"
+	"mime/multipart"
+	"net/http"
+	"time"
 
+	"github.com/andersonreyes/moneybadger/models"
 	"github.com/andersonreyes/moneybadger/store"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	"github.com/shopspring/decimal"
 )
 
 type transactionsApi struct {
-	db store.TransactionStore
+	db store.Store
 }
 
-func TransactionsInit(ctx *context.Context, db *gorm.DB) transactionsApi {
+func TransactionsInit(dbStore store.Store) transactionsApi {
 	return transactionsApi{
-		db: store.TransactionStoreInit(ctx, db),
+		db: dbStore,
 	}
 }
 
@@ -24,164 +32,144 @@ type transactionsRequestParams struct {
 	TemplateName  string `uri:"templateName"`
 }
 
-func (c transactionsApi) SetupRouter(router *gin.RouterGroup) error {
-	router.GET("/transactions", func(ctx *gin.Context) {
-		accs, err := c.db.ListTransactions()
+func (c transactionsApi) importCsv(f *multipart.File) error {
+	reader := csv.NewReader(*f)
+	// skip header
+	reader.Read()
+	for {
+
+		line, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+
+		if len(line) != 7 {
+			log.Printf("invalid csv line, expected 7 fields but got [%d]: %+v\n", len(line), line)
+			return errors.New("invalid csv line")
+		}
+
+		desc := line[4]
+
+		var transaction models.Transaction
+
+		amnt, err := decimal.NewFromString(line[3])
+		if err != nil {
+			log.Printf("invalid account column [%s]: %s\n", line[3], err.Error())
+			return err
+		}
+
+		if line[1] != "" {
+			sourceAccount, err := c.db.Accounts.GetAccountByName(line[1])
+			if err == nil {
+				transaction.SourceAccount = sourceAccount
+				transaction.SourceAccountID = sourceAccount.ID
+			}
+
+		}
+
+		if line[6] != "" {
+			destAccount, err := c.db.Accounts.GetAccountByName(line[6])
+			if err == nil {
+				transaction.DestinationAccount = destAccount
+				transaction.DestinationAccountID = destAccount.ID
+			}
+
+		}
+
+		t, err := time.Parse(time.DateOnly, line[0])
+		if err != nil {
+			log.Printf("invalid date [%s] : %s\n", line[0], err.Error())
+			return err
+		}
+
+		transaction.Date = t
+		transaction.Amount = amnt
+		transaction.Category = line[2]
+		transaction.Description = desc
+
+		_, found, err := c.db.Transactions.GetExistingTransaction(transaction)
 
 		if err != nil {
-			ctx.JSON(500, gin.H{
+			log.Printf("error looking for existing transaction [%+v]: %s", transaction, err.Error())
+			return err
+
+		}
+
+		if !found {
+			if err := c.db.Transactions.CreateTransaction(transaction); err != nil {
+				log.Printf("failed to create transaction [%+v]: %s", transaction, err.Error())
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (c transactionsApi) SetupRouter(router *gin.RouterGroup) error {
+	router.POST("/transactions/upload", func(ctx *gin.Context) {
+		// Source
+		file, err := ctx.FormFile("transactions")
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error":   true,
 				"message": err.Error(),
 			})
 		}
 
-		ctx.JSON(200, gin.H{
+		f, _ := file.Open()
+		defer f.Close()
+
+		if err := c.importCsv(&f); err != nil {
+			ctx.String(http.StatusBadRequest, "upload file err: %s", err.Error())
+			return
+		}
+
+		ctx.Header("HX-Refresh", "true")
+		ctx.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": fmt.Sprintf("File %s uploaded successfully.", file.Filename),
+		})
+	})
+
+	router.GET("/transactions", func(ctx *gin.Context) {
+		accs, err := c.db.Transactions.ListTransactions()
+
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
 			"error":   false,
 			"message": "",
 			"data":    accs,
 		})
 	})
 
-	// router.PUT("/transactions", func(ctx *gin.Context) {
+	router.DELETE("/transactions/all", func(ctx *gin.Context) {
 
-	// 	var overWrites models.Account
+		err := c.db.Transactions.DeleteAllTransaction()
 
-	// 	if err := ctx.ShouldBind(&overWrites); err != nil {
-	// 		log.Printf("Put:/transactions error: %s", err)
-	// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": true, "message": err.Error()})
-	// 		return
-	// 	}
+		if err != nil {
+			log.Printf("error deleting transactions: %s\n", err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
 
-	// 	if overWrites.Type == "" {
-	// 		overWrites.Type = models.AccountTypeDefault
-	// 	}
-
-	// 	log.Printf("updating %+v\n", overWrites)
-	// 	if err := c.db.UpdateAccount(overWrites); err != nil {
-	// 		log.Printf("error updating account %+v:\n%s\n", overWrites, err)
-	// 		ctx.JSON(http.StatusInternalServerError, gin.H{
-	// 			"error":   true,
-	// 			"message": err.Error(),
-	// 		})
-	// 		return
-	// 	}
-
-	// 	ctx.JSON(http.StatusOK, gin.H{
-	// 		"error":   false,
-	// 		"message": "",
-	// 	})
-	// })
-
-	// router.GET("/transactions/:accountNumber", func(ctx *gin.Context) {
-	// 	var req transactionsRequestParams
-
-	// 	if err := ctx.ShouldBindUri(&req); err != nil {
-	// 		log.Printf("invalid account number: %s\n", err)
-	// 		ctx.JSON(http.StatusBadRequest, gin.H{
-	// 			"error":   true,
-	// 			"message": err.Error(),
-	// 		})
-	// 		return
-	// 	}
-	// 	acc, err := c.db.GetAccount(req.AccountNumber)
-
-	// 	if err != nil {
-	// 		log.Printf("error getting account %+v:\n%s\n", req, err)
-	// 		ctx.JSON(http.StatusInternalServerError, gin.H{
-	// 			"error":   true,
-	// 			"message": err.Error(),
-	// 		})
-	// 		return
-	// 	}
-
-	// 	ctx.JSON(http.StatusOK, gin.H{
-	// 		"error":   false,
-	// 		"message": "",
-	// 		"data":    []models.Account{acc},
-	// 	})
-	// })
-
-	// router.POST("/transactions", func(ctx *gin.Context) {
-	// 	var accToCreate models.Account
-	// 	if accToCreate.Type == "" {
-	// 		accToCreate.Type = models.AccountTypeDefault
-	// 	}
-
-	// 	if err := ctx.ShouldBind(&accToCreate); err != nil {
-	// 		log.Printf("Post:/transactions error: %s", err)
-	// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": true, "message": err.Error()})
-	// 		return
-	// 	}
-
-	// 	if err := c.db.CreateAccount(accToCreate); err != nil {
-	// 		log.Printf("error creating account %+v:\n%s\n", accToCreate, err)
-	// 		ctx.JSON(http.StatusInternalServerError, gin.H{
-	// 			"error":   true,
-	// 			"message": err.Error(),
-	// 		})
-	// 		return
-	// 	}
-
-	// 	ctx.JSON(http.StatusOK, gin.H{
-	// 		"error":   false,
-	// 		"message": "account created",
-	// 	})
-	// })
-
-	// router.DELETE("/transactions/:accountNumber", func(ctx *gin.Context) {
-
-	// 	var req transactionsRequestParams
-
-	// 	if err := ctx.ShouldBindUri(&req); err != nil {
-	// 		log.Printf("invalid account number: %s\n", err)
-	// 		ctx.JSON(http.StatusBadRequest, gin.H{
-	// 			"error":   true,
-	// 			"message": err.Error(),
-	// 		})
-	// 		return
-	// 	}
-	// 	err := c.db.DeleteAccount(req.AccountNumber)
-
-	// 	if err != nil {
-	// 		log.Printf("error deleting account %s:\n%s\n", req.AccountNumber, err)
-	// 		ctx.JSON(http.StatusInternalServerError, gin.H{
-	// 			"error":   true,
-	// 			"message": err.Error(),
-	// 		})
-	// 		return
-	// 	}
-
-	// 	ctx.JSON(http.StatusOK, gin.H{
-	// 		"error":   false,
-	// 		"message": "account deleted",
-	// 	})
-	// })
-
-	// // templates
-
-	// router.GET("/template/transactions/:templateName/:accountNumber", func(ctx *gin.Context) {
-	// 	var req transactionsRequestParams
-
-	// 	if err := ctx.ShouldBindUri(&req); err != nil {
-	// 		log.Printf("invalid template name: %s\n", err)
-	// 		ctx.JSON(http.StatusBadRequest, gin.H{
-	// 			"error":   true,
-	// 			"message": err.Error(),
-	// 		})
-	// 		return
-	// 	}
-
-	// 	a, err := c.db.GetAccount(req.AccountNumber)
-
-	// 	if err != nil {
-	// 		ctx.JSON(http.StatusNotFound, gin.H{
-	// 			"error":   true,
-	// 			"message": "invalid account number",
-	// 		})
-	// 	}
-
-	// 	ctx.HTML(http.StatusOK, req.TemplateName, a)
-	// })
+		ctx.Header("HX-Refresh", "true")
+		ctx.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "all transactions deleted",
+		})
+	})
 
 	return nil
 }

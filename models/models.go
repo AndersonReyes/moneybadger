@@ -17,7 +17,7 @@ const (
 
 type Account struct {
 	gorm.Model
-	AccountNumber  string          `gorm:"primaryKey;unique" binding:"required"`
+	AccountNumber  string          `gorm:"index;unique"`
 	Type           AccountType     `gorm:"size:128;notnull"`
 	Name           string          `gorm:"index;notnull"`
 	InitialBalance decimal.Decimal `gorm:"notnull"`
@@ -30,10 +30,10 @@ type Transaction struct {
 	Amount               decimal.Decimal `gorm:"notnull"`
 	Category             string          `gorm:"index;notnull"`
 	Date                 time.Time       `gorm:"index,notnull"`
+	SourceAccountID      uint
 	SourceAccount        Account
-	SourceAccountID      string
+	DestinationAccountID uint
 	DestinationAccount   Account
-	DestinationAccountID string
 	Tags                 string
 }
 

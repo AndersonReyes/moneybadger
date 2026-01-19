@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 
 	"github.com/andersonreyes/moneybadger/models"
 	"github.com/andersonreyes/moneybadger/routes"
@@ -30,14 +31,30 @@ func main() {
 
 	router.Static("/assets", "./assets")
 	router.LoadHTMLGlob("views/templates/**/*")
+	dbStore := store.StoreInit(&ctx, db)
 
-	if err := routes.SetupRoutes(apiRouter, &ctx, db); err != nil {
+	if err := routes.SetupRoutes(apiRouter, dbStore); err != nil {
 		log.Panicf("failed to setup routes: %s\n", err)
 	}
 
-	if err := views.SetUpViews(router, store.AccountStoreInit(&ctx, db), store.TransactionStoreInit(&ctx, db)); err != nil {
+	if err := views.SetUpViews(router, dbStore); err != nil {
 		log.Panicf("failed to setup views: %s\n", err)
 	}
+
+	apiRouter.GET("/template/raw", func(ctx *gin.Context) {
+		var templateName = ctx.Query("templateName")
+
+		if templateName == "" {
+			log.Printf("invalid template name: %s\n", err)
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		ctx.HTML(http.StatusOK, templateName, gin.H{})
+	})
 
 	router.Run()
 }

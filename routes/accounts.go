@@ -2,23 +2,21 @@
 package routes
 
 import (
-	"context"
 	"log"
 	"net/http"
 
 	"github.com/andersonreyes/moneybadger/models"
 	"github.com/andersonreyes/moneybadger/store"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type accountsApi struct {
-	db store.AccountStore
+	db store.Store
 }
 
-func AccountsInit(ctx *context.Context, db *gorm.DB) accountsApi {
+func AccountsInit(dbStore store.Store) accountsApi {
 	return accountsApi{
-		db: store.AccountStoreInit(ctx, db),
+		db: dbStore,
 	}
 }
 
@@ -29,7 +27,7 @@ type accountsRequestParams struct {
 
 func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 	router.GET("/accounts", func(ctx *gin.Context) {
-		accs, err := c.db.ListAccounts()
+		accs, err := c.db.Accounts.ListAccounts()
 
 		if err != nil {
 			ctx.JSON(500, gin.H{
@@ -60,7 +58,7 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 		}
 
 		log.Printf("updating %+v\n", overWrites)
-		if err := c.db.UpdateAccount(overWrites); err != nil {
+		if err := c.db.Accounts.UpdateAccount(overWrites); err != nil {
 			log.Printf("error updating account %+v:\n%s\n", overWrites, err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error":   true,
@@ -86,7 +84,7 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 			})
 			return
 		}
-		acc, err := c.db.GetAccount(req.AccountNumber)
+		acc, err := c.db.Accounts.GetAccount(req.AccountNumber)
 
 		if err != nil {
 			log.Printf("error getting account %+v:\n%s\n", req, err)
@@ -116,7 +114,7 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 			return
 		}
 
-		if err := c.db.CreateAccount(accToCreate); err != nil {
+		if err := c.db.Accounts.CreateAccount(accToCreate); err != nil {
 			log.Printf("error creating account %+v:\n%s\n", accToCreate, err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error":   true,
@@ -143,7 +141,7 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 			})
 			return
 		}
-		err := c.db.DeleteAccount(req.AccountNumber)
+		err := c.db.Accounts.DeleteAccount(req.AccountNumber)
 
 		if err != nil {
 			log.Printf("error deleting account %s:\n%s\n", req.AccountNumber, err)
@@ -174,7 +172,7 @@ func (c accountsApi) SetupRouter(router *gin.RouterGroup) error {
 			return
 		}
 
-		a, err := c.db.GetAccount(req.AccountNumber)
+		a, err := c.db.Accounts.GetAccount(req.AccountNumber)
 
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{

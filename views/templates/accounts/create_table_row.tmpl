@@ -1,6 +1,5 @@
 {{ define "accounts_edit_table_row" }}
 <tr hx-trigger="cancel" class="editing" hx-swap="delete">
-  <td><input name="ID" readonly value="{{ .ID }}" /></td>
   <td><input name="Type" value="{{.Type}}" /></td>
   <td><input name="AccountNumber" value="{{.AccountNumber}}" /></td>
   <td><input autofocus name="Name" value="{{.Name }}" /></td>

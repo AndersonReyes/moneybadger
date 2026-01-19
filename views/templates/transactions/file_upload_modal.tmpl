@@ -1,0 +1,18 @@
+{{ define "transactions_file_upload_modal" }}
+<dialog open>
+  <article>
+    <h2>Import from File</h2>
+    <form
+      hx-encoding="multipart/form-data"
+      hx-post="/api/transactions/upload"
+      _="on htmx:xhr:progress(loaded, total) set #progress.value to (loaded/total)*100"
+    >
+      <input type="file" id="importFile" name="filename" />
+      <footer>
+        <button type="submit" form="importFile" class="primary">Submit</button>
+        <button data-bs-dismiss="modal" class="secondary">Cancel</button>
+      </footer>
+    </form>
+  </article>
+</dialog>
+{{ end }}

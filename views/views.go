@@ -12,10 +12,9 @@ type accountViewRequestParams struct {
 	AccountNumber string `uri:"accountNumber"`
 }
 
-func SetUpViews(router *gin.Engine, accountsStore store.AccountStore,
-	transactionStore store.TransactionStore) error {
+func SetUpViews(router *gin.Engine, dbStore store.Store) error {
 	router.GET("/accounts", func(ctx *gin.Context) {
-		accs, err := accountsStore.ListAccounts()
+		accs, err := dbStore.Accounts.ListAccounts()
 
 		if err != nil {
 			log.Printf("failed to get accounts: %s", err)
@@ -31,7 +30,7 @@ func SetUpViews(router *gin.Engine, accountsStore store.AccountStore,
 	})
 
 	router.GET("/transactions", func(ctx *gin.Context) {
-		ts, err := transactionStore.ListTransactions()
+		ts, err := dbStore.Transactions.ListTransactions()
 
 		if err != nil {
 			log.Printf("failed to get accounts: %s", err)

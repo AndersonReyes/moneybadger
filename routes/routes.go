@@ -1,17 +1,16 @@
 package routes
 
 import (
-	"context"
 	"log"
 
 	"github.com/andersonreyes/moneybadger/models"
+	"github.com/andersonreyes/moneybadger/store"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-func SetupRoutes(g *gin.RouterGroup, ctx *context.Context, db *gorm.DB) error {
+func SetupRoutes(g *gin.RouterGroup, dbStore store.Store) error {
 
-	apis := []models.ApiRoute{AccountsInit(ctx, db), TransactionsInit(ctx, db)}
+	apis := []models.ApiRoute{AccountsInit(dbStore), TransactionsInit(dbStore)}
 
 	for _, api := range apis {
 		if err := api.SetupRouter(g); err != nil {
