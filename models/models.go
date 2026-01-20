@@ -40,3 +40,9 @@ type Transaction struct {
 type ApiRoute interface {
 	SetupRouter(router *gin.RouterGroup) error
 }
+
+type TransactionFilters struct {
+	TextSearch string    `uri:"textSearch"`
+	StartDate  time.Time `uri:"startDate" binding:"required"`
+	EndDate    time.Time `uri:"endDate" binding:"required"`
+}

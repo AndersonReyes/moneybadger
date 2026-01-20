@@ -12,6 +12,9 @@ type accountViewRequestParams struct {
 	AccountNumber string `uri:"accountNumber"`
 }
 
+type transactionHTML struct {
+}
+
 func SetUpViews(router *gin.Engine, dbStore store.Store) error {
 	router.GET("/accounts", func(ctx *gin.Context) {
 		accs, err := dbStore.Accounts.ListAccounts()

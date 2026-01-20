@@ -134,7 +134,18 @@ func (c transactionsApi) SetupRouter(router *gin.RouterGroup) error {
 	})
 
 	router.GET("/transactions", func(ctx *gin.Context) {
-		accs, err := c.db.Transactions.ListTransactions()
+		var filters models.TransactionFilters
+
+		if err := ctx.ShouldBindQuery(&filters); err != nil {
+			log.Printf("invalid query params: %s", err)
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		accs, err := c.db.Transactions.ListTransactions(filters)
 
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{

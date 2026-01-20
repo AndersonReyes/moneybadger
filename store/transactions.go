@@ -30,12 +30,20 @@ func (c TransactionStore) CreateTransaction(a models.Transaction) error {
 	return err
 }
 
-func (c TransactionStore) ListTransactions() ([]models.Transaction, error) {
-	accounts, err := gorm.G[models.Transaction](c.db).
+func (c TransactionStore) ListTransactions(filters models.TransactionFilters) ([]models.Transaction, error) {
+	s := gorm.G[models.Transaction](c.db).Where("")
+	var q gorm.ChainInterface[models.Transaction] = s.Where("")
+
+	if filters.TextSearch != "" {
+		q = s.Where("description LIKE ?", "%"+filters.TextSearch+"%")
+	}
+
+	accounts, err := q.Where("date >= ? and date < ?", filters.StartDate, filters.EndDate).
 		Order("date desc").
 		Preload("SourceAccount", nil).
 		Preload("DestinationAccount", nil).
 		Find(*c.ctx)
+
 	if err != nil {
 		log.Println("ListTransactions failed: " + err.Error())
 		return nil, err
