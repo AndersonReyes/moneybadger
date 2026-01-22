@@ -24,6 +24,10 @@ type Account struct {
 	Balance        decimal.Decimal `gorm:"notnull"`
 }
 
+type ApiRoute interface {
+	SetupRouter(router *gin.RouterGroup) error
+}
+
 type Transaction struct {
 	gorm.Model
 	Description          string          `gorm:"notnull;class:FULLTEXT"`
@@ -37,12 +41,15 @@ type Transaction struct {
 	Tags                 string
 }
 
-type ApiRoute interface {
-	SetupRouter(router *gin.RouterGroup) error
-}
-
 type TransactionFilters struct {
 	TextSearch string    `uri:"textSearch"`
 	StartDate  time.Time `uri:"startDate" binding:"required"`
 	EndDate    time.Time `uri:"endDate" binding:"required"`
+}
+
+type Budget struct {
+	gorm.Model
+	Category       string `gorm:"index;notnull;unique"`
+	ExpectedAmount decimal.Decimal
+	ActualAmount   decimal.Decimal
 }

@@ -10,7 +10,7 @@ import (
 
 func SetupRoutes(g *gin.RouterGroup, dbStore store.Store) error {
 
-	apis := []models.ApiRoute{AccountsInit(dbStore), TransactionsInit(dbStore)}
+	apis := []models.ApiRoute{AccountsInit(dbStore), TransactionsInit(dbStore), BudgetsInit(dbStore)}
 
 	for _, api := range apis {
 		if err := api.SetupRouter(g); err != nil {

@@ -22,7 +22,7 @@ func main() {
 	ctx := context.Background()
 
 	// // Migrate the schema
-	db.AutoMigrate(&models.Account{}, &models.Transaction{})
+	db.AutoMigrate(&models.Account{}, &models.Transaction{}, &models.Budget{})
 
 	router := gin.Default()
 	apiRouter := router.Group("/api")

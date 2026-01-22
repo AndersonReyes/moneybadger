@@ -6,9 +6,7 @@ import requests
 import streamlit as st
 from components import global_date_filter
 
-st.set_page_config(
-    page_title="Transactions",
-)
+st.set_page_config(page_title="Transactions", layout="wide")
 
 
 # @st.cache_data()
@@ -40,6 +38,12 @@ def api_transactions(
         )
         df["Date"] = pd.to_datetime(df["Date"])
         df["Amount"] = df["Amount"].astype(float)
+        df["SourceAccount"] = df["SourceAccount"].apply(
+            lambda x: f"{x['Name']} ({x['AccountNumber']})"
+        )
+        df["DestinationAccount"] = df["DestinationAccount"].apply(
+            lambda x: f"{x['Name']} ({x['AccountNumber']})"
+        )
     return df
 
 
@@ -95,6 +99,7 @@ st.date_input(
 )
 
 # category chart
+# TODO: color chart based on pos,neg,neutral category based on the sign of amount
 st.write("# Amount By Category")
 cats = get_data()
 if len(cats) > 0:
